@@ -3,7 +3,6 @@
 
 import os
 import random
-import json
 import time
 from pathlib import Path
 import boto3
@@ -30,12 +29,13 @@ def load_env_variables():
     }
 
 
-# select a random json file from the input data set
-def get_random_json_file(folder_path):
-    json_files = list(Path(folder_path).glob("*.json"))
-    if not json_files:
-        raise FileNotFoundError(f"No JSON files found in {folder_path}")
-    return random.choice(json_files)
+# select a random pdf file from the input data set
+def get_random_pdf_file(folder_path):
+    pdf_files = list(Path(folder_path).glob("*.pdf"))
+    print(pdf_files)
+    if not pdf_files:
+        raise FileNotFoundError(f"No PDF files found in {folder_path}")
+    return random.choice(pdf_files)
 
 
 # upload the selected file to the s3 bucket into uploads folder.
@@ -43,7 +43,7 @@ def upload_to_s3(s3_client, file_path, bucket_name):
     try:
         with open(file_path, "rb") as file:
             s3_client.upload_fileobj(
-                file, bucket_name, f"uploads/{Path(file_path).name}"
+                file, bucket_name, f"{Path(file_path).name}"
             )
         print(f"Successfully uploaded {file_path.name} to S3")
     except Exception as e:
@@ -81,7 +81,7 @@ def main():
     while count_uploads < NUM_UPLOADS:
         count_uploads += 1
         try:
-            file_path = get_random_json_file(DATA_FOLDER)
+            file_path = get_random_pdf_file(DATA_FOLDER)
             upload_to_s3(s3_client, file_path, aws_credentials["s3_bucket_name"])
 
             # Wait for the specified interval
